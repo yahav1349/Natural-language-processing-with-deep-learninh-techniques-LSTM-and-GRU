@@ -16,4 +16,4 @@ This project implements a simple LSTM and GRU text classifiers for detecting emo
 ```bash
 wget http://nlp.stanford.edu/data/glove.6B.zip
 unzip glove.6B.zip
-*You can also download the GloVe embeddings manually from [Stanford NLP GloVe page](https://nlp.stanford.edu/projects/glove/).*
+*You can also download the GloVe embeddings manually from [Stanford NLP GloVe page](https://nlp.stanford.edu/projects/glove.) zip name: glove.6B.zip*
