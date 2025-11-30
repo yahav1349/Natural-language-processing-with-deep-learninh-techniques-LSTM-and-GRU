@@ -1,0 +1,4 @@
+glove.6B.*
+*.pth
+project_a
+data
