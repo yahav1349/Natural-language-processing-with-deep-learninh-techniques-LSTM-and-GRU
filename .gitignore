@@ -2,3 +2,6 @@ glove.6B.*
 *.pth
 project_a
 data
+embeddings
+.ipynb_checkpoints
+__pycache__/

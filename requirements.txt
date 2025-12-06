@@ -1,6 +1,9 @@
+ipykernel
 numpy
 pandas
 torch
 nltk
 tqdm
-
+seaborn
+matplotlib
+scikit-learn
