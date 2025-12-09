@@ -73,7 +73,7 @@ def plot_training_progress(arr00, arr01, arr10, arr11, sup_tit, figsize=(14, 5),
     ax[1].set_ylabel(ys[1], fontsize=16)
     plt.show()
     
-def plot_confusion_matrix(test_df, results, classes, n_err_examples=10, figsize=(10, 8), cmap='Blues', normalize=False):
+def plot_confusion_matrix(test_df, results, classes, n_err_examples=10, figsize=(10, 8), cmap='Blues', title='Confusion matrix'):
     """
     Plot a confusion matrix heatmap from a DataFrame with ground truth and predicted classes.
     
@@ -94,28 +94,33 @@ def plot_confusion_matrix(test_df, results, classes, n_err_examples=10, figsize=
     
     # Compute confusion matrix
     cm = confusion_matrix(df['gt_cls'], df['pred_cls'])
-    
+    # Compute row-wise percentages
+    row_sums = cm.sum(axis=1, keepdims=True)
+    cm_pct = cm / row_sums  # fraction from 0 to 1
+
+    annot = cm.astype(str)
+
+    for i in range(len(annot)):
+        pct = cm_pct[i, i] * 100
+        annot[i, i] = f"{cm[i, i]}\n ({pct:.1f}%)"
     # Get unique class labels
     classes = sorted(df['gt_cls'].unique())
-    
-    # Normalize if requested
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        fmt = '.2%'
-        title = 'Normalized Confusion Matrix'
-    else:
-        fmt = 'd'
-        title = 'Confusion Matrix'
     
     # Create figure
     fig, ax = plt.subplots(figsize=figsize)
     
-    # Plot heatmap
-    sns.heatmap(cm, annot=True, fmt=fmt, cmap=cmap, 
-                xticklabels=classes, yticklabels=classes,
-                cbar_kws={'label': 'Percentage' if normalize else 'Count'},
-                linewidths=0.5, linecolor='gray',
-                ax=ax)
+    sns.heatmap(
+    cm,
+    annot=annot,
+    fmt='',            
+    cmap=cmap,
+    xticklabels=classes,
+    yticklabels=classes,
+    cbar_kws={'label': 'Count'},
+    linewidths=0.5,
+    linecolor='gray',
+    ax=ax
+)
     
     ax.set_xlabel('Predicted Class', fontsize=12, fontweight='bold')
     ax.set_ylabel('Ground Truth Class', fontsize=12, fontweight='bold')
