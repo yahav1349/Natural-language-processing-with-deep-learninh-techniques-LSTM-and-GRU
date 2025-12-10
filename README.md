@@ -27,4 +27,8 @@ pip install -r requirements.txt
 4. Edit the following constants in Project_A.ipynb:
 
 - EMBEDDINGS_PATH: the path to the folder continaing the embeddings.
-- DATA_FILES_PATH: the path to the folder containing data.zip  
+- DATA_FILES_PATH: the path to the folder containing data.zip
+
+## Results
+
+![Training Progress](plots/joint_loss_and_acc.png)  

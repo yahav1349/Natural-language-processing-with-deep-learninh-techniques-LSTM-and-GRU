@@ -135,3 +135,153 @@ def plot_confusion_matrix(test_df, results, classes, n_err_examples=10, figsize=
     err_examples = df[df.label != df.pred]
     samples = err_examples.sample(n=min(len(err_examples), n_err_examples), random_state=42)[["text", "gt_cls", "pred_cls"]]
     return samples
+
+def plot_layer_metrics(df, figsize=(16, 6)):
+    """
+    Plot side-by-side line plots for Loss and Accuracy over epochs.
+    
+    Args:
+        df: DataFrame with columns 'Layer', 'Metric', 'Split', 'Epoch', 'Value'
+        figsize: Figure size
+    
+    Returns:
+        matplotlib figure
+    """
+    # Filter data for Loss and Accuracy
+    loss_data = df[df['Metric'] == 'Loss']
+    acc_data = df[df['Metric'] == 'Accuracy']
+    
+    # Create figure with two subplots
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    
+    # Get unique layers and splits for consistent styling
+    unique_layers = sorted(df['Layer'].unique())
+    unique_splits = sorted(df['Split'].unique())
+    
+    # Define color palette for layers
+    layer_colors = sns.color_palette("husl", len(unique_layers))
+    layer_palette = dict(zip(unique_layers, layer_colors))
+    
+    # Define line styles for splits
+    split_styles = ['-', '--', '-.', ':']
+    split_style_map = dict(zip(unique_splits, split_styles[:len(unique_splits)]))
+    
+    # Plot 1: Loss
+    ax1 = axes[0]
+    for layer in unique_layers:
+        for split in unique_splits:
+            subset = loss_data[(loss_data['Layer'] == layer) & (loss_data['Split'] == split)]
+            if len(subset) > 0:
+                ax1.plot(subset['Epoch'], subset['Value'],
+                        color=layer_palette[layer],
+                        linestyle=split_style_map[split],
+                        marker='o',
+                        markersize=4,
+                        linewidth=2,
+                        label=f'{layer} - {split}',
+                        alpha=0.8)
+    
+    ax1.set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Loss', fontsize=12, fontweight='bold')
+    ax1.set_title('Loss over Epochs', fontsize=14, fontweight='bold', pad=15)
+    ax1.legend(loc='best', frameon=True, fontsize=9)
+    ax1.grid(True, alpha=0.3, linestyle='--')
+    
+    # Plot 2: Accuracy
+    ax2 = axes[1]
+    for layer in unique_layers:
+        for split in unique_splits:
+            subset = acc_data[(acc_data['Layer'] == layer) & (acc_data['Split'] == split)]
+            if len(subset) > 0:
+                ax2.plot(subset['Epoch'], subset['Value'],
+                        color=layer_palette[layer],
+                        linestyle=split_style_map[split],
+                        marker='o',
+                        markersize=4,
+                        linewidth=2,
+                        label=f'{layer} - {split}',
+                        alpha=0.8)
+    
+    ax2.set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    ax2.set_ylabel('Accuracy', fontsize=12, fontweight='bold')
+    ax2.set_title('Accuracy over Epochs', fontsize=14, fontweight='bold', pad=15)
+    ax2.legend(loc='best', frameon=True, fontsize=9)
+    ax2.grid(True, alpha=0.3, linestyle='--')
+    
+    plt.tight_layout()
+    return fig
+
+
+def plot_layer_metrics_seaborn(df, figsize=(16, 6)):
+    """
+    Plot side-by-side line plots for Loss and Accuracy using seaborn.
+    
+    Args:
+        df: DataFrame with columns 'Layer', 'Metric', 'Split', 'Epoch', 'Value'
+        figsize: Figure size
+    
+    Returns:
+        matplotlib figure
+    """
+    # Filter data for Loss and Accuracy
+    loss_data = df[df['Metric'] == 'Loss']
+    acc_data = df[df['Metric'] == 'Accuracy']
+    
+    # Create figure with two subplots
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    
+    # Get unique splits for line styles
+    unique_splits = sorted(df['Split'].unique())
+    split_styles = ['-', '--', '-.', ':']
+    style_order = unique_splits
+    
+    # Plot 1: Loss
+    sns.lineplot(
+        data=loss_data,
+        x='Epoch',
+        y='Value',
+        hue='Layer',
+        style='Split',
+        markers=True,
+        dashes=False,
+        palette='husl',
+        linewidth=2,
+        markersize=8,
+        ax=axes[0]
+    )
+    
+    axes[0].set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    axes[0].set_ylabel('Loss', fontsize=12, fontweight='bold')
+    axes[0].set_title('Loss over Epochs', fontsize=14, fontweight='bold', pad=15)
+    axes[0].legend(loc='best', frameon=True, fontsize=9, title='Layer - Split')
+    axes[0].grid(True, alpha=0.3, linestyle='--')
+    
+    # Plot 2: Accuracy
+    sns.lineplot(
+        data=acc_data,
+        x='Epoch',
+        y='Value',
+        hue='Layer',
+        style='Split',
+        markers=True,
+        dashes=False,
+        palette='husl',
+        linewidth=2,
+        markersize=8,
+        ax=axes[1]
+    )
+    
+    axes[1].set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    axes[1].set_ylabel('Accuracy', fontsize=12, fontweight='bold')
+    axes[1].set_title('Accuracy over Epochs', fontsize=14, fontweight='bold', pad=15)
+    axes[1].legend(loc='best', frameon=True, fontsize=9, title='Layer - Split')
+    axes[1].grid(True, alpha=0.3, linestyle='--')
+    
+    plt.tight_layout()
+    return fig
+data = {"Layer": ["LSTM"]*30+["GRU"]*30+["LSTM"]*30+["GRU"]*30,
+        "Metric": ["Loss"]*60 + ["Accuracy"]*60,
+        "Split": ["Train"]*15+["Validation"]*15+["Train"]*15+["Validation"]*15+["Train"]*15+["Validation"]*15+["Train"]*15+["Validation"]*15,
+        "Epoch": list(range(len(lstm_train_losses)))*8,
+        "Value": lstm_train_losses + lstm_val_losses + gru_train_losses + gru_val_losses + lstm_train_accuracies + lstm_val_accuracies + gru_train_accuracies + gru_val_accuracies}
+df = pd.DataFrame(data)
